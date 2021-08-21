@@ -1,10 +1,13 @@
 const dbService = require('../services/dbService');
 const { supportedSites } = require('../supportedSites');
 const Discord = require('discord.js');
+const { numberToDiscordEmoji } = require('../helpers/helpers');
+
+const websitePattern = /^add ((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.]+\.(?:pl|com)).*)$/g;
 
 exports.showHelp = message => {
   let embed = new Discord.MessageEmbed()
-    .setColor('#28254F')
+    .setColor('#0071ce')
     .setTitle('Offer Finder')
     .setDescription('Bot informujący o nowych ogłoszeniach z popularnych serwisów ogłoszeniowych')
     .addField('\u200B', '\u200B')
@@ -37,24 +40,46 @@ exports.setChannel = message => {
     });
 }
 
-const websitePattern = /^add ((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.]+\.(?:pl|com)).*)$/g;
-
 exports.addUrl = async message => {
-  const msg = message.content.toLowerCase().replace(process.env.BOT_PREFIX+' ', '');
-  const website = websitePattern.exec(msg);
-  if(!website) {
-    message.channel.send('Nieprawidłowy link!');
-    return;
-  }
-  if(!Object.keys(supportedSites).includes(website[2])) {
-    message.channel.send(`Offer Finder nie wspiera linków do strony ${website[2]}`);
-    return;
-  }
-  const lastOfferID = await supportedSites[website[2]].getLastOfferID(website[1]);
-  dbService.addUrl(message.guild.id, message.channel.id, website[1], lastOfferID).then(() => {
+  try {
+    const msg = message.content.toLowerCase().replace(process.env.BOT_PREFIX+' ', '');
+    const website = websitePattern.exec(msg);
+    if(!website) {
+      message.channel.send('Nieprawidłowy link!');
+      return;
+    }
+    if(!Object.keys(supportedSites).includes(website[2])) {
+      message.channel.send(`Offer Finder nie wspiera linków do strony ${website[2]}`);
+      return;
+    }
+    if(await dbService.urlExists(message.guild.id, website[1])) {
+      message.channel.send('Podany link już znajduje się na liście obserwowanych!');
+      return;
+    }
+    const lastOfferID = await supportedSites[website[2]].getLastOfferID(website[1]);
+    await dbService.addUrl(message.guild.id, message.channel.id, website[1], lastOfferID);
     message.channel.send('Dodano link do listy obserwowanych!');
+  } catch(err) {
+    console.log("🚀 ~ file: messageController.js ~ line 58 ~ err", err)
+    message.channel.send('Wystąpił błąd!');
+  }
+}
+
+exports.listUrls = message => {
+  dbService.getUrls(message.guild.id).then(urls => {
+    let embed = new Discord.MessageEmbed()
+      .setColor('#0071ce')
+      .setTitle('Obserwowane strony')
+      .setDescription(`Ilość aktualnie obserowowanych stron: **${urls.length}**
+      Użyj **!of delete <id>** aby usunąć link z obserwowanych`)
+      .addField(`ID \t Url\n`,
+      urls.reduce((text, url, index) => {
+        return text += `${numberToDiscordEmoji(index+1)} [${url.slice(0, 50)}...](${url})\n`
+      }, ''))
+      .setFooter('Offer FInder')
+    message.channel.send(embed);
   }).catch(err => {
-    console.log(err);
+    console.log("🚀 ~ file: messageController.js ~ line 81 ~ dbService.getUrls ~ err", err)
     message.channel.send('Wystąpił błąd!');
   });
 }

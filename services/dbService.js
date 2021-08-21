@@ -19,25 +19,31 @@ exports.setChannel = (serverID, channelID, cb) => {
   });
 }
 
-exports.addUrl = (serverID, channelID, url, lastOfferID) => new Promise((resolve, reject) => {
-  Server.findOne({serverID: serverID}).then(data => {
+exports.addUrl = (serverID, channelID, url, lastOfferID) => {
+  return Server.findOne({serverID: serverID}).then(data => {
     if(data) {
       data.urls.push({
         url: url,
         lastID: lastOfferID
       });
-      data.save().then(() => resolve()).catch(err => reject(err));
+      return data.save();
     } else {
-      Server.create({
+      return Server.create({
         serverID: serverID,
         channelID: channelID,
         urls: [{
           url: url,
           lastID: lastOfferID
         }]
-      }).then(() => resolve()).catch(err => reject(err));
+      });
     }
-  }).catch(err => {
-    reject(err);
   });
-});
+}
+
+exports.getUrls = serverID => {
+  return Server.findOne({serverID: serverID}).then(data => data.urls.map(url => url.url));
+}
+
+exports.urlExists = (serverID, url) => {
+  return Server.findOne({serverID: serverID, 'urls.url': url }).then(exists => !!exists);
+}
