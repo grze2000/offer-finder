@@ -11,18 +11,16 @@ const setSortingType = urlString => {
 
 exports.setSortingType = setSortingType;
 
-exports.getLastOfferID = async url => {
-  const root = parse((await axios.get(setSortingType(url))).data);
-  const lastOfferID = root.querySelector('.offer-item').getAttribute('data-ad-id');
-  return new Promise((resolve, reject) => {
-    resolve(lastOfferID);
+exports.getLastOfferID = url => {
+  return axios.get(setSortingType(url)).then(res => {
+    return parseInt(parse(res.data).querySelector('.offer-item').getAttribute('data-ad-id'));
   });
 }
 
 exports.getNewOffers = (url, lastOfferID) => {
   return axios.get(setSortingType(url)).then(res => {
     const root = parse(res.data);
-    const offers = root.querySelectorAll('.offer-item').filter(offer => offer.getAttribute('data-ad-id') > lastOfferID)
+    const offers = root.querySelectorAll('.offer-item').filter(offer => offer.getAttribute('data-ad-id') > parseInt(lastOfferID))
     .map(offer => ({
       id: offer.getAttribute('data-ad-id'),
       url: offer.getAttribute('data-href'),

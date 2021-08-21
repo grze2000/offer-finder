@@ -14,7 +14,7 @@ exports.loop = async client => {
       if(!channel) continue;
 
       for(const url of server.urls) {;
-        const websitePattern = /^((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.]+\.(?:pl|com)).*)$/g;
+        const websitePattern = /^((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.-]+\.(?:pl|com)).*)$/g;
         const website = websitePattern.exec(url.url);
 
         if(Object.keys(supportedSites).includes(website[2])) {

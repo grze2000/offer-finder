@@ -3,7 +3,7 @@ const { supportedSites } = require('../supportedSites');
 const Discord = require('discord.js');
 const { numberToDiscordEmoji, ValidationError } = require('../helpers/helpers');
 
-const websitePattern = /^add ((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.]+\.(?:pl|com)).*)$/g;
+const websitePattern = /^add ((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.-]+\.(?:pl|com)).*)$/g;
 
 exports.showHelp = message => {
   let embed = new Discord.MessageEmbed()
