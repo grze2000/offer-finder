@@ -1,4 +1,5 @@
 const Server = require('../models/Server');
+const { ValidationError } = require('../helpers/helpers');
 
 exports.setChannel = (serverID, channelID, cb) => {
   Server.findOne({serverID: serverID}, (err, data) => {
@@ -46,4 +47,14 @@ exports.getUrls = serverID => {
 
 exports.urlExists = (serverID, url) => {
   return Server.findOne({serverID: serverID, 'urls.url': url }).then(exists => !!exists);
+}
+
+exports.deleteUrl = (serverID, urlIndex) => {
+  return Server.findOne({serverID: serverID}).then(server => {
+    if(urlIndex > server.urls.length || urlIndex < 1) {
+      throw new ValidationError('Niepoprawne ID linku!');
+    }
+    server.urls[urlIndex-1].remove();
+    return server.save();
+  });
 }

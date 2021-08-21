@@ -1,7 +1,7 @@
 const dbService = require('../services/dbService');
 const { supportedSites } = require('../supportedSites');
 const Discord = require('discord.js');
-const { numberToDiscordEmoji } = require('../helpers/helpers');
+const { numberToDiscordEmoji, ValidationError } = require('../helpers/helpers');
 
 const websitePattern = /^add ((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.]+\.(?:pl|com)).*)$/g;
 
@@ -81,5 +81,14 @@ exports.listUrls = message => {
   }).catch(err => {
     console.log("🚀 ~ file: messageController.js ~ line 81 ~ dbService.getUrls ~ err", err)
     message.channel.send('Wystąpił błąd!');
+  });
+}
+
+exports.deleteUrl = message => {
+  const number = /^delete ([0-9]+)$/g.exec(message.content.toLowerCase().replace(process.env.BOT_PREFIX+' ', ''));
+  dbService.deleteUrl(message.guild.id, parseInt(number[1])).then(data => {
+    message.channel.send('Link został usunięty z lisy obserwowanych!');
+  }).catch(err => {
+    message.channel.send(err instanceof ValidationError ? err.message : 'Wystąpił błąd!');
   });
 }

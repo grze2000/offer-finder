@@ -13,3 +13,12 @@ exports.numberToDiscordEmoji = number => {
   };
 return number.toString().replace(/[0-9]/gi, matched => numbers[matched]);
 }
+
+class ValidationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
+exports.ValidationError = ValidationError; 
