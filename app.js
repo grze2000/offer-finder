@@ -26,7 +26,8 @@ client.on('message', message => {
 
     const commands = {
       '^help$': messageController.showHelp,
-      '^channel <#[0-9]+>$': messageController.setChannel
+      '^channel <#[0-9]+>$': messageController.setChannel,
+      '^add (http|https):\/\/.+$': messageController.addUrl
     }
 
     for (const [pattern, func] of Object.entries(commands)) {

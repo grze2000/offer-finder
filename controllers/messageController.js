@@ -1,4 +1,5 @@
 const dbService = require('../services/dbService');
+const { supportedSites } = require('../supportedSites');
 const Discord = require('discord.js');
 
 exports.showHelp = message => {
@@ -34,4 +35,26 @@ exports.setChannel = message => {
 
       message.channel.send(`Ustawiono kanał dla ogłoszeń: <#${message.mentions.channels.first().id}>`);
     });
+}
+
+const websitePattern = /^add ((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.]+\.(?:pl|com)).*)$/g;
+
+exports.addUrl = async message => {
+  const msg = message.content.toLowerCase().replace(process.env.BOT_PREFIX+' ', '');
+  const website = websitePattern.exec(msg);
+  if(!website) {
+    message.channel.send('Nieprawidłowy link!');
+    return;
+  }
+  if(!Object.keys(supportedSites).includes(website[2])) {
+    message.channel.send(`Offer Finder nie wspiera linków do strony ${website[2]}`);
+    return;
+  }
+  const lastOfferID = await supportedSites[website[2]].getLastOfferID(website[1]);
+  dbService.addUrl(message.guild.id, message.channel.id, website[1], lastOfferID).then(() => {
+    message.channel.send('Dodano link do listy obserwowanych!');
+  }).catch(err => {
+    console.log(err);
+    message.channel.send('Wystąpił błąd!');
+  });
 }
