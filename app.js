@@ -5,6 +5,7 @@ const client = new Discord.Client();
 const mongoose = require('mongoose');
 const dbService = require('./services/dbService');
 const messageController = require('./controllers/messageController');
+const { loop } = require('./loop');
 
 mongoose.connect(process.env.MONGODB_URI, {useUnifiedTopology: true, useNewUrlParser: true}).then(() => {
   console.log(`[${new Date().toLocaleString()}] Conected to database`);
@@ -15,6 +16,8 @@ mongoose.connect(process.env.MONGODB_URI, {useUnifiedTopology: true, useNewUrlPa
 client.on('ready', () => {
   console.log(`[${new Date().toLocaleString()}] Logged in as ${client.user.tag}!`);
   client.user.setActivity('oferty', {type: 'WATCHING'});
+  loop(client);
+  setInterval(() => { loop(client) }, 1000*60*5);
 })
 
 client.on('message', message => {
