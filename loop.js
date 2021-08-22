@@ -25,7 +25,7 @@ exports.loop = async client => {
               .setTitle(offer.title)
               .setDescription(`W serwisie ${website[2]} pojawiło się nowe ogłoszenie!`)
               .setURL(offer.url)
-              .attachFiles(new Discord.MessageAttachment(`./assets/logos/${website[2]}.png`, 'image.png'))
+              .attachFiles(new Discord.MessageAttachment(`./assets/logos/${website[2].replace('www.', '')}.png`, 'image.png'))
               .setImage(offer.image)
               .setThumbnail('attachment://image.png')
               .addFields(
