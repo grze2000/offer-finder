@@ -17,7 +17,7 @@ client.on('ready', () => {
   console.log(`[${new Date().toLocaleString()}] Logged in as ${client.user.tag}!`);
   client.user.setActivity('oferty', {type: 'WATCHING'});
   loop(client);
-  setInterval(() => { loop(client) }, 1000*60*5);
+  setInterval(() => { loop(client) }, 1000*60*parseInt(process.env.REFRESH_INTERVAL));
 })
 
 client.on('message', message => {
