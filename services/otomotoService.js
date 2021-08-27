@@ -24,7 +24,8 @@ exports.getNewOffers = (url, lastOfferID) => {
     .map(offer => ({
       id: offer.getAttribute('data-ad-id'),
       url: offer.getAttribute('data-href'),
-      image: offer.querySelector('.offer-item__photo-link img').getAttribute('data-srcset') ? 
+      image: !offer.querySelector('.offer-item__photo-link img') ? null :
+        offer.querySelector('.offer-item__photo-link img').getAttribute('data-srcset') ? 
         offer.querySelector('.offer-item__photo-link img').getAttribute('data-srcset').split(' ')[0] :
         offer.querySelector('.offer-item__photo-link img').getAttribute('data-src'),
       title: offer.querySelector('.offer-title__link').structuredText.trim(),
