@@ -71,12 +71,14 @@ exports.listUrls = message => {
       .setColor('#0071ce')
       .setTitle('Obserwowane strony')
       .setDescription(`Ilość aktualnie obserowowanych stron: **${urls.length}**
-      Użyj **!of delete <id>** aby usunąć link z obserwowanych`)
-      .addField(`ID \t Url\n`,
+      Użyj **!of delete <id>** aby usunąć link z obserwowanych`);
+    if(urls.length) {
+      embed.addField(`ID \t Url\n`,
       urls.reduce((text, url, index) => {
         return text += `${numberToDiscordEmoji(index+1)} [${url.slice(0, 50)}...](${url})\n`
-      }, ''))
-      .setFooter('Offer FInder')
+      }, ''));
+    }
+    embed.setFooter('Offer FInder');
     message.channel.send(embed);
   }).catch(err => {
     console.log("🚀 ~ file: messageController.js ~ line 81 ~ dbService.getUrls ~ err", err)

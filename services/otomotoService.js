@@ -9,30 +9,34 @@ const setSortingType = urlString => {
   return url.toString();
 }
 
+const listLabels = [
+  'Rok produkcji',
+  'Przebieg',
+  'Pojemność',
+  'Rodzaj paliwa',
+]
+
 exports.setSortingType = setSortingType;
 
 exports.getLastOfferID = url => {
   return axios.get(setSortingType(url)).then(res => {
-    return parseInt(parse(res.data).querySelector('.offer-item').getAttribute('data-ad-id'));
+    return parseInt(parse(res.data).querySelector('main > article').getAttribute('id'));
   });
 }
 
 exports.getNewOffers = (url, lastOfferID) => {
   return axios.get(setSortingType(url)).then(res => {
     const root = parse(res.data);
-    const offers = root.querySelectorAll('.offer-item').filter(offer => offer.getAttribute('data-ad-id') > parseInt(lastOfferID))
+    const offers = root.querySelectorAll('main article').filter(offer => parseInt(offer.getAttribute('id')) > parseInt(lastOfferID))
     .map(offer => ({
-      id: offer.getAttribute('data-ad-id'),
-      url: offer.getAttribute('data-href'),
-      image: !offer.querySelector('.offer-item__photo-link img') ? null :
-        offer.querySelector('.offer-item__photo-link img').getAttribute('data-srcset') ? 
-        offer.querySelector('.offer-item__photo-link img').getAttribute('data-srcset').split(' ')[0] :
-        offer.querySelector('.offer-item__photo-link img').getAttribute('data-src'),
-      title: offer.querySelector('.offer-title__link').structuredText.trim(),
-      price: offer.querySelector('.offer-price__number').structuredText.trim(),
-      location: offer.querySelector('.ds-location-city').text,
-      details: offer.querySelectorAll('.ds-params-block li').reduce((prev, curr) => {
-        prev[curr.getAttribute('data-code')] = curr.structuredText.trim()
+      id: offer.getAttribute('id'),
+      url: offer.querySelector('h2[data-testid=ad-title] a').getAttribute('href'),
+      image: !offer.querySelector('img') ? null : offer.querySelector('img').getAttribute('src'),
+      title: offer.querySelector('h2[data-testid=ad-title] a').structuredText.trim(),
+      price: offer.querySelector('.ooa-epvm6').structuredText.trim(),
+      location: offer.querySelector('.e1b25f6f7').structuredText.trim(),
+      details: offer.querySelectorAll('.e1b25f6f7').reduce((prev, curr, index) => {
+        prev[index < listLabels.length ? listLabels[index] : 'Inne'] = curr.structuredText.trim()
         return prev;
       }, {})
     }));
