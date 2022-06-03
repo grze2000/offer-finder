@@ -3,7 +3,8 @@ const Server = require('./models/Server');
 const axios = require('axios');
 const { parse } = require('node-html-parser');
 const Discord = require('discord.js');
-const { supportedSites } = require('./supportedSites');
+const { supportedSites, supportedUrls } = require('./supportedSites');
+const xkomService = require('./services/xkomService');
 
 exports.loop = async client => {
   try {
@@ -54,3 +55,52 @@ exports.loop = async client => {
     console.log("🚀 ~ file: loop.js ~ line 50 ~ err", err);
   }
 };
+
+const xkomLoop = async (client) => {
+  try {
+    const servers = await Server.find({});
+    const offer = await xkomService.getNewOffer();
+
+    for(const server of servers) {
+      const channel = await client.channels.fetch(server.channelID);
+      if(!channel) continue;
+
+      for(const url of server.urls) {;
+        const websitePattern = /^((?:http|https):\/\/((?:www\.)?[a-zA-Z0-9.-]+\.(?:pl|com)).*)$/g;
+        const website = websitePattern.exec(url.url);
+
+        if(supportedUrls[0] === website[1]) {
+          let embed = new Discord.MessageEmbed()
+            .setColor('#0071ce')
+            .setTitle(offer.title)
+            .setDescription(offer.description)
+            .setURL(offer.url)
+            .attachFiles(new Discord.MessageAttachment(`./assets/logos/${website[2].replace('www.', '')}.jpg`, 'image.jpg'))
+            .setImage(offer.image)
+            .setThumbnail('attachment://image.jpg')
+            .addFields(
+              { name: 'Cena regularna', value: offer.regularPrice, inline: true },
+              { name: 'Cena promocyjna', value: offer.price, inline: true },
+            )
+            .setAuthor(website[2], 'attachment://image.jpg')
+            .setFooter(website[2], 'attachment://image.jpg')
+            .setTimestamp(new Date)
+          channel.send(embed);
+        }
+      }
+    }
+    const now = new Date();
+    let millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0, 0, 0) - now;
+    if(millisTill10 < 0) {
+      millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 22, 0, 0, 0) - now;
+    }
+    if(millisTill10 < 0) {
+      millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 10, 0, 0, 0) - now;
+    }
+    setTimeout(() => xkomLoop(client), millisTill10);
+  } catch(err) {
+    console.log("🚀 ~ file: loop.js ~ line 102 ~ err", err);
+  }
+}
+
+exports.xkomLoop = xkomLoop;

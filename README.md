@@ -11,6 +11,7 @@ You can view watch list by using `!of list` command and remove link from watch l
 ## Supported advertising websites
 * [otomoto.pl](https://otomoto.pl/)
 * [mk-motors.com.pl](https://mk-motors.com.pl/)
+* [x-kom.pl](https://www.x-kom.pl/) - only current Hot Deal (https://www.x-kom.pl/goracy_strzal)
 
 ## Used technologies
 * Node.js

@@ -1,5 +1,5 @@
 const dbService = require('../services/dbService');
-const { supportedSites } = require('../supportedSites');
+const { supportedSites, supportedUrls } = require('../supportedSites');
 const Discord = require('discord.js');
 const { numberToDiscordEmoji, ValidationError } = require('../helpers/helpers');
 
@@ -48,7 +48,7 @@ exports.addUrl = async message => {
       message.channel.send('Nieprawidłowy link!');
       return;
     }
-    if(!Object.keys(supportedSites).includes(website[2])) {
+    if(!Object.keys(supportedSites).includes(website[2]) && !supportedUrls.includes(website[1])) {
       message.channel.send(`Offer Finder nie wspiera linków do strony ${website[2]}`);
       return;
     }
@@ -56,11 +56,11 @@ exports.addUrl = async message => {
       message.channel.send('Podany link już znajduje się na liście obserwowanych!');
       return;
     }
-    const lastOfferID = await supportedSites[website[2]].getLastOfferID(website[1]);
+    const lastOfferID = Object.keys(supportedSites).includes(website[2]) ? await supportedSites[website[2]].getLastOfferID(website[1]) : null;
     await dbService.addUrl(message.guild.id, message.channel.id, website[1], lastOfferID);
     message.channel.send('Dodano link do listy obserwowanych!');
   } catch(err) {
-    console.log("🚀 ~ file: messageController.js ~ line 58 ~ err", err)
+    console.log("🚀 ~ file: messageController.js ~ line 63 ~ err", err)
     message.channel.send('Wystąpił błąd!');
   }
 }

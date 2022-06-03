@@ -5,7 +5,7 @@ const client = new Discord.Client();
 const mongoose = require('mongoose');
 const dbService = require('./services/dbService');
 const messageController = require('./controllers/messageController');
-const { loop } = require('./loop');
+const { loop, xkomLoop } = require('./loop');
 
 mongoose.connect(process.env.MONGODB_URI, {useUnifiedTopology: true, useNewUrlParser: true}).then(() => {
   console.log(`[${new Date().toLocaleString()}] Conected to database`);
@@ -18,7 +18,17 @@ client.on('ready', () => {
   client.user.setActivity('oferty', {type: 'WATCHING'});
   loop(client);
   setInterval(() => { loop(client) }, 1000*60*parseInt(process.env.REFRESH_INTERVAL));
-})
+  
+  const now = new Date();
+  let millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0, 0, 0) - now;
+  if(millisTill10 < 0) {
+    millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 22, 0, 0, 0) - now;
+  }
+  if(millisTill10 < 0) {
+    millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 10, 0, 0, 0) - now;
+  }
+  setTimeout(() => xkomLoop(client), millisTill10);
+});
 
 client.on('message', message => {
   if(message.content.toLowerCase().startsWith(process.env.BOT_PREFIX) &&

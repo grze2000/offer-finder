@@ -12,10 +12,7 @@ const serverSchema = new Schema({
       type: String,
       required: true,
     },
-    lastID: {
-      type: Number,
-      required: true
-    }
+    lastID: Number,
   }]
 });
 
